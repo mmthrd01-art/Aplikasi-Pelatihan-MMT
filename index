@@ -591,18 +591,31 @@ async function submitFirebaseConfig(){
   await initFirebase(cfg);
 }
 
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('TIMEOUT:'+label)), ms))
+  ]);
+}
 async function initFirebase(cfg){
   showOnly('screen-loading');
+  const isFileProtocol = location.protocol === 'file:';
   try{
     if(!firebase.apps.length) firebase.initializeApp(cfg);
     db = firebase.firestore();
-    await seedIfEmpty();
+    await withTimeout(seedIfEmpty(), 12000, 'seed');
     showOnly('screen-login');
   }catch(e){
     console.error(e);
     showOnly('screen-setup');
     const errEl = document.getElementById('setupError');
-    errEl.textContent = 'Gagal terhubung ke Firebase: ' + e.message;
+    if(isFileProtocol){
+      errEl.innerHTML = 'Gagal terhubung ke Firebase.<br><br><b>Kemungkinan besar penyebabnya:</b> file ini dibuka langsung dari folder (file:// ...). Firestore tidak bisa berjalan dengan cara ini.<br><br>Buka file ini lewat web server, contoh: unggah ke <b>Firebase Hosting</b>, <b>Netlify Drop</b> (app.netlify.com/drop, tinggal drag file), atau jalankan <code>python3 -m http.server</code> lalu buka lewat <code>http://localhost:8000</code>.';
+    } else if(String(e.message).startsWith('TIMEOUT')){
+      errEl.innerHTML = 'Koneksi ke Firebase terlalu lama (timeout).<br><br>Periksa:<br>1. Koneksi internet kamu.<br>2. Firestore Database sudah dibuat di Firebase Console.<br>3. Firestore Rules mengizinkan akses baca/tulis (mode test).';
+    } else {
+      errEl.textContent = 'Gagal terhubung ke Firebase: ' + e.message;
+    }
     errEl.classList.add('show');
   }
 }
