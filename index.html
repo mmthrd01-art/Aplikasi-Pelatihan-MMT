@@ -678,11 +678,13 @@ function confirmLogout(){
 }
 function doLogout(){
   currentUser = null;
+  document.querySelectorAll('#mainApp .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('mainApp').style.display='none';
   showOnly('screen-login');
 }
 
 async function enterApp(){
+  document.querySelectorAll('#app > .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('mainApp').style.display='block';
   document.getElementById('roleBadge').textContent = currentUser.role==='admin' ? 'ADMIN' : 'KARYAWAN';
   document.getElementById('topSubtitle').textContent = currentUser.role==='admin' ? 'Panel Administrator' : 'AC Technician Training';
