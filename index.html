@@ -854,7 +854,7 @@ function renderQuestion(){
   setMascot(document.getElementById('quizMascotImg'), document.getElementById('quizMascot'), 'face_berpikir');
   state.quiz.answered = false;
 
-  const optList = document.getElementById(
+  const optList = document.getElementById('optList');
   optList.innerHTML='';
   const opts = [['a',q.options.a],['b',q.options.b],['c',q.options.c],['d',q.options.d]].filter(o=>o[1] && o[1].trim()!=='');
   opts.forEach(([key,text])=>{
